@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 namespace BlazorComponentUtilities
 {
-
     public struct StyleBuilder
     {
         private string stringBuffer;
@@ -58,7 +57,7 @@ namespace BlazorComponentUtilities
         /// <param name="prop"></param>
         /// <param name="value">Style to add</param>
         /// <returns>StyleBuilder</returns>
-        public StyleBuilder AddStyle(string prop, string value) => AddRaw($"{prop}:{value};");
+        public StyleBuilder AddStyle<T>(string prop, T value) => value != null ? AddRaw($"{prop}:{value};") : this;
 
         /// <summary>
         /// Adds a conditional in-line style to the builder with space separator and closing semicolon..
@@ -67,8 +66,16 @@ namespace BlazorComponentUtilities
         /// <param name="value">Style to conditionally add.</param>
         /// <param name="when">Condition in which the style is added.</param>
         /// <returns>StyleBuilder</returns>
-        public StyleBuilder AddStyle(string prop, string value, bool when = true) => when ? this.AddStyle(prop, value) : this;
+        public StyleBuilder AddStyle<T>(string prop, T value, bool when = true) => when ? this.AddStyle(prop, value) : this;
 
+        /// <summary>
+        /// Adds a conditional in-line style to the builder with space separator and closing semicolon..
+        /// </summary>
+        /// <param name="prop"></param>
+        /// <param name="value">Style to conditionally add.</param>
+        /// <param name="when">Condition in which the style is added.</param>
+        /// <returns>StyleBuilder</returns>
+        public StyleBuilder AddStyle<T>(Func<string> prop, T value, bool when = true) => when ? this.AddStyle(prop(), value) : this;
 
         /// <summary>
         /// Adds a conditional in-line style to the builder with space separator and closing semicolon..
@@ -77,7 +84,7 @@ namespace BlazorComponentUtilities
         /// <param name="value">Style to conditionally add.</param>
         /// <param name="when">Condition in which the style is added.</param>
         /// <returns></returns>
-        public StyleBuilder AddStyle(string prop, Func<string> value, bool when = true) => when ? this.AddStyle(prop, value()) : this;
+        public StyleBuilder AddStyle<T>(string prop, Func<T> value, bool when = true) => when ? this.AddStyle(prop, value()) : this;
 
         /// <summary>
         /// Adds a conditional in-line style to the builder with space separator and closing semicolon..
@@ -86,7 +93,7 @@ namespace BlazorComponentUtilities
         /// <param name="value">Style to conditionally add.</param>
         /// <param name="when">Condition in which the style is added.</param>
         /// <returns>StyleBuilder</returns>
-        public StyleBuilder AddStyle(string prop, string value, Func<bool> when = null) => this.AddStyle(prop, value, when());
+        public StyleBuilder AddStyle<T>(string prop, T value, Func<bool> when = null) => this.AddStyle(prop, value, when());
 
         /// <summary>
         /// Adds a conditional in-line style to the builder with space separator and closing semicolon..
@@ -95,7 +102,7 @@ namespace BlazorComponentUtilities
         /// <param name="value">Style to conditionally add.</param>
         /// <param name="when">Condition in which the style is added.</param>
         /// <returns>StyleBuilder</returns>
-        public StyleBuilder AddStyle(string prop, Func<string> value, Func<bool> when = null) => this.AddStyle(prop, value(), when());
+        public StyleBuilder AddStyle<T>(string prop, Func<T> value, Func<bool> when = null) => this.AddStyle(prop, value(), when());
 
         /// <summary>
         /// Adds a conditional nested StyleBuilder to the builder with separator and closing semicolon.
@@ -140,9 +147,9 @@ namespace BlazorComponentUtilities
         /// <param name="additionalAttributes">Additional Attribute splat parameters</param>
         /// <returns>StyleBuilder</returns>
         public StyleBuilder AddStyleFromAttributes(IReadOnlyDictionary<string, object> additionalAttributes) =>
-            additionalAttributes == null ? this :
-            additionalAttributes.TryGetValue("style", out var c) ? AddRaw(c.ToString()) : this;
-
+            additionalAttributes == null
+                ? this
+                    : additionalAttributes.TryGetValue("style", out var c) ? AddRaw(c as string) : this;
 
         /// <summary>
         /// Finalize the completed Style as a string.
@@ -151,7 +158,7 @@ namespace BlazorComponentUtilities
         public string Build()
         {
             // String buffer finalization code
-            return stringBuffer != null ? stringBuffer.Trim() : string.Empty;
+            return string.IsNullOrEmpty(stringBuffer) ? null : stringBuffer.Trim();
         }
 
         // ToString should only and always call Build to finalize the rendered string.

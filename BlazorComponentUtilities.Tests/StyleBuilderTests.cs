@@ -79,7 +79,7 @@ namespace BlazorComponentUtilities.Tests
         public void ShouldNotAddEmptyStyle()
         {
             var StyleToRender = StyleBuilder.Empty().AddStyle("");
-                
+
             StyleToRender.NullIfEmpty().Should().BeNull();
 
         }
@@ -113,10 +113,6 @@ namespace BlazorComponentUtilities.Tests
             //if (hasStyle.Font_Underline) td.Append("underline ");
             //if (hasStyle.Font_Overline) td.Append("overline ");
             //if (hasStyle.Font_Strikeout) td.Append("line-through");
-
-            bool HasFontUnderline = true;
-            bool HasOverline = false;
-            bool HasStrikeout = true;
 
             var StyleToRender = StyleBuilder.Empty()
                 .AddStyle("text-decoration", v => v
